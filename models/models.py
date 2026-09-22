@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, UniqueConstraint
 from sqlalchemy import types
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import uuid
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
@@ -16,6 +16,8 @@ class Companies(Base):
     url: Mapped[str] = mapped_column(types.Text)
     industry: Mapped[str] = mapped_column(types.Text)
 
+    job_postings: Mapped[list["JobPostings"]] = relationship(back_populates="company")
+
 class JobPostings(Base):
     __tablename__ = "job_postings"
 
@@ -30,17 +32,24 @@ class JobPostings(Base):
     deadline: Mapped[date] = mapped_column(types.Date)
     date_posted: Mapped[date] = mapped_column(types.Date)
 
+    company: Mapped["Companies"] = relationship(back_populates="job_postings")
+    applications: Mapped[list["Applications"]] = relationship(back_populates="job_posting")
+    cover_letters: Mapped[list["CoverLetters"]] = relationship(back_populates="job_posting")
+    job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="job_posting")
+
 class Resumes(Base):
     __tablename__ = "resumes"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(types.Text, nullable=False)
-    version: Mapped[int] = mapped_column(types.INTEGER, nullable=False)
+    version: Mapped[float] = mapped_column(types.Numeric(6, 2), nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
 
     __table_args__ = (
         UniqueConstraint("name", "version", name="uq_resumes_name_version"),
     )
+
+    applications: Mapped[list["Applications"]] = relationship(back_populates="resume")
 
 class CoverLetters(Base):
     __tablename__ = "cover_letters"
@@ -50,6 +59,8 @@ class CoverLetters(Base):
     name: Mapped[str] = mapped_column(types.Text, nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
 
+    job_posting: Mapped["JobPostings"] = relationship(back_populates="cover_letters")
+
 class Applications(Base):
     __tablename__ = "applications"
 
@@ -58,8 +69,12 @@ class Applications(Base):
     resumes_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("resumes.id"))
     date_applied: Mapped[date] = mapped_column(types.Date, nullable=False)
     status: Mapped[str] = mapped_column(types.Text, default="pending")
-    created_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True), default=datetime.now(ZoneInfo("America/Los_Angeles")))
+    created_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Los_Angeles")))
     updated_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True))
+
+    job_posting: Mapped["JobPostings"] = relationship(back_populates="applications")
+    resume: Mapped["Resumes"] = relationship(back_populates="applications")
+    interviews: Mapped[list["Interviews"]] = relationship(back_populates="application")
 
 class Interviews(Base):
     __tablename__ = "interviews"
@@ -69,7 +84,9 @@ class Interviews(Base):
     type: Mapped[str] = mapped_column(types.Text)
     scheduled_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True))
     notes: Mapped[str] = mapped_column(types.Text)
-    created_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True), default=datetime.now(ZoneInfo("America/Los_Angeles")))
+    created_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Los_Angeles")))
+
+    application: Mapped["Applications"] = relationship(back_populates="interviews")
 
 class Skills(Base):
     __tablename__ = "skills"
@@ -78,9 +95,14 @@ class Skills(Base):
     name: Mapped[str] = mapped_column(types.Text, unique=True, nullable=False)
     description: Mapped[str] = mapped_column(types.Text)
 
+    job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="skill")
+    
 class JobPostingsSkills(Base):
     __tablename__ = "job_postings_skills"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
     job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"))
     skills_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("skills.id"))
+
+    skill: Mapped["Skills"] = relationship(back_populates="job_postings_skills")
+    job_posting: Mapped["JobPostings"] = relationship(back_populates="job_postings_skills")
