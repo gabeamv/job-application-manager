@@ -1,6 +1,7 @@
 from sqlalchemy import Column, ForeignKey, UniqueConstraint
 from sqlalchemy import types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from typing import Optional
 import uuid
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
@@ -13,8 +14,8 @@ class Companies(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(types.Text, unique=True, nullable=False)
-    url: Mapped[str] = mapped_column(types.Text)
-    industry: Mapped[str] = mapped_column(types.Text)
+    url: Mapped[Optional[str]] = mapped_column(types.Text)
+    industry: Mapped[Optional[str]] = mapped_column(types.Text)
 
     job_postings: Mapped[list["JobPostings"]] = relationship(back_populates="company")
 
@@ -25,12 +26,12 @@ class JobPostings(Base):
     company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
     job_title: Mapped[str] = mapped_column(types.Text, nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
-    description: Mapped[str] = mapped_column(types.Text)
-    employment_type: Mapped[str] = mapped_column(types.Text)
-    salary_min: Mapped[float] = mapped_column(types.Numeric(8, 2))
-    salary_max: Mapped[float] = mapped_column(types.Numeric(8,2))
-    deadline: Mapped[date] = mapped_column(types.Date)
-    date_posted: Mapped[date] = mapped_column(types.Date)
+    description: Mapped[Optional[str]] = mapped_column(types.Text)
+    employment_type: Mapped[Optional[str]] = mapped_column(types.Text)
+    salary_min: Mapped[Optional[float]] = mapped_column(types.Numeric(8, 2))
+    salary_max: Mapped[Optional[float]] = mapped_column(types.Numeric(8,2))
+    deadline: Mapped[Optional[date]] = mapped_column(types.Date)
+    date_posted: Mapped[Optional[date]] = mapped_column(types.Date)
 
     company: Mapped["Companies"] = relationship(back_populates="job_postings")
     applications: Mapped[list["Applications"]] = relationship(back_populates="job_posting")
@@ -55,7 +56,7 @@ class CoverLetters(Base):
     __tablename__ = "cover_letters"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"))
+    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"), nullable=False)
     name: Mapped[str] = mapped_column(types.Text, nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
 
@@ -65,12 +66,12 @@ class Applications(Base):
     __tablename__ = "applications"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"))
-    resumes_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("resumes.id"))
+    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"), nullable=False)
+    resumes_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("resumes.id"), nullable=False)
     date_applied: Mapped[date] = mapped_column(types.Date, nullable=False)
-    status: Mapped[str] = mapped_column(types.Text, default="pending")
-    created_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Los_Angeles")))
-    updated_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True))
+    status: Mapped[Optional[str]] = mapped_column(types.Text, default="pending")
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Los_Angeles")))
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True))
 
     job_posting: Mapped["JobPostings"] = relationship(back_populates="applications")
     resume: Mapped["Resumes"] = relationship(back_populates="applications")
@@ -80,11 +81,11 @@ class Interviews(Base):
     __tablename__ = "interviews"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    applications_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id"))
-    type: Mapped[str] = mapped_column(types.Text)
-    scheduled_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True))
-    notes: Mapped[str] = mapped_column(types.Text)
-    created_at: Mapped[datetime] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Los_Angeles")))
+    applications_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id"), nullable=False)
+    type: Mapped[Optional[str]] = mapped_column(types.Text)
+    scheduled_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True))
+    notes: Mapped[Optional[str]] = mapped_column(types.Text)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(datetime.UTC))
 
     application: Mapped["Applications"] = relationship(back_populates="interviews")
 
@@ -93,7 +94,7 @@ class Skills(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(types.Text, unique=True, nullable=False)
-    description: Mapped[str] = mapped_column(types.Text)
+    description: Mapped[Optional[str]] = mapped_column(types.Text)
 
     job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="skill")
     
@@ -101,8 +102,8 @@ class JobPostingsSkills(Base):
     __tablename__ = "job_postings_skills"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"))
-    skills_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("skills.id"))
+    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"), nullable=False)
+    skills_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("skills.id"), nullable=False)
 
     skill: Mapped["Skills"] = relationship(back_populates="job_postings_skills")
     job_posting: Mapped["JobPostings"] = relationship(back_populates="job_postings_skills")
