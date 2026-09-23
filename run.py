@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from api import (applications, companies, cover_letters, interviews, job_postings,
-job_postings_skills, resumes, skills, test)
+job_postings_skills, resumes, skills, dev)
 
 app = FastAPI()
 
-app.include_router(test.router, prefix="/api/test", tags=["test"])
+app.include_router(dev.router, prefix="/api/dev", tags=["dev"])
 app.include_router(applications.router, prefix="/api/applications", tags=["applications"])
 app.include_router(companies.router, prefix="/api/companies", tags=["companies"])
 app.include_router(cover_letters.router, prefix="/api/cover_letters", tags=["cover_letters"])

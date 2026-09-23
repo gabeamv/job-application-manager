@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
@@ -12,5 +12,13 @@ connectionString = f"{os.getenv("DB_PROTO") +
                       os.getenv("DB_NAME")
                       }"
 engine = create_engine(connectionString)
+Session = sessionmaker(bind=engine)
+
+def get_db():
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
