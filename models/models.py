@@ -23,7 +23,7 @@ class JobPostings(Base):
     __tablename__ = "job_postings"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"))
+    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     job_title: Mapped[str] = mapped_column(types.Text, nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(types.Text)

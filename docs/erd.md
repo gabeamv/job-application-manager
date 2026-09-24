@@ -14,66 +14,66 @@ erDiagram
 
     COMPANIES {
         uuid id PK
-        text name UK
-        text url
-        text industry
+        text name UK "NOT NULL"
+        text url "NULL"
+        text industry "NULL"
     }
 
     JOB_POSTINGS {
         uuid id PK
-        uuid company_id FK
-        text job_title
-        text url
-        text description
-        text employment_type
-        numeric salary_min
-        numeric salary_max
-        date deadline
-        date date_posted
+        uuid company_id FK "NOT NULL"
+        text job_title "NOT NULL"
+        text url "NOT NULL"
+        text description "NULL"
+        text employment_type "NULL"
+        numeric salary_min "NULL"
+        numeric salary_max "NULL"
+        date deadline "NULL"
+        date date_posted "NULL"
     }
 
     RESUMES {
         uuid id PK
-        text name UK
-        numeric version UK
-        text url
+        text name UK "NOT NULL"
+        numeric version UK "NOT NULL"
+        text url "NOT NULL"
     }
 
     COVER_LETTERS {
         uuid id PK
-        uuid job_postings_id FK
-        text name
-        text url
+        uuid job_postings_id FK "NOT NULL"
+        text name "NOT NULL"
+        text url "NOT NULL"
     }
 
     APPLICATIONS {
         uuid id PK
-        uuid job_postings_id FK
-        uuid resumes_id FK
-        date date_applied
-        text status
-        timestamptz created_at
-        timestamptz updated_at
+        uuid job_postings_id FK "NOT NULL"
+        uuid resumes_id FK "NOT NULL"
+        date date_applied "NOT NULL"
+        text status "NULL, default 'pending'"
+        timestamptz created_at "NULL, default now"
+        timestamptz updated_at "NULL"
     }
 
     INTERVIEWS {
         uuid id PK
-        uuid applications_id FK
-        text type
-        timestamptz scheduled_at
-        text notes
-        timestamptz created_at
+        uuid applications_id FK "NOT NULL"
+        text type "NULL"
+        timestamptz scheduled_at "NULL"
+        text notes "NULL"
+        timestamptz created_at "NULL, default now"
     }
 
     SKILLS {
         uuid id PK
-        text name UK
-        text description
+        text name UK "NOT NULL"
+        text description "NULL"
     }
 
     JOB_POSTINGS_SKILLS {
         uuid id PK
-        uuid job_postings_id FK
-        uuid skills_id FK
+        uuid job_postings_id FK "NOT NULL"
+        uuid skills_id FK "NOT NULL"
     }
 ```
