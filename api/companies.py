@@ -54,3 +54,10 @@ def update_company(id: UUID, payload: CompanyUpdate, db: Session = Depends(get_d
     db.refresh(company)
     return company
 
+@router.delete("/{id}")
+def delete_company(id: UUID, db: Session = Depends(get_db)):
+    company = db.get(Companies, id)
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Company {id} not found")
+    db.delete(company)
+    db.commit()

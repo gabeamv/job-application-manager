@@ -17,13 +17,13 @@ class Companies(Base):
     url: Mapped[Optional[str]] = mapped_column(types.Text)
     industry: Mapped[Optional[str]] = mapped_column(types.Text)
 
-    job_postings: Mapped[list["JobPostings"]] = relationship(back_populates="company")
+    job_postings: Mapped[list["JobPostings"]] = relationship(back_populates="company", passive_deletes=True)
 
 class JobPostings(Base):
     __tablename__ = "job_postings"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"))
+    company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"))
     job_title: Mapped[str] = mapped_column(types.Text, nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(types.Text)
@@ -34,9 +34,9 @@ class JobPostings(Base):
     date_posted: Mapped[Optional[date]] = mapped_column(types.Date)
 
     company: Mapped["Companies"] = relationship(back_populates="job_postings")
-    applications: Mapped[list["Applications"]] = relationship(back_populates="job_posting")
-    cover_letters: Mapped[list["CoverLetters"]] = relationship(back_populates="job_posting")
-    job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="job_posting")
+    applications: Mapped[list["Applications"]] = relationship(back_populates="job_posting", passive_deletes=True)
+    cover_letters: Mapped[list["CoverLetters"]] = relationship(back_populates="job_posting", passive_deletes=True)
+    job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="job_posting", passive_deletes=True)
 
 class Resumes(Base):
     __tablename__ = "resumes"
@@ -50,13 +50,13 @@ class Resumes(Base):
         UniqueConstraint("name", "version", name="uq_resumes_name_version"),
     )
 
-    applications: Mapped[list["Applications"]] = relationship(back_populates="resume")
+    applications: Mapped[list["Applications"]] = relationship(back_populates="resume", passive_deletes=True)
 
 class CoverLetters(Base):
     __tablename__ = "cover_letters"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"), nullable=False)
+    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(types.Text, nullable=False)
     url: Mapped[str] = mapped_column(types.Text, nullable=False)
 
@@ -66,8 +66,8 @@ class Applications(Base):
     __tablename__ = "applications"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"), nullable=False)
-    resumes_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("resumes.id"), nullable=False)
+    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False)
+    resumes_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"), nullable=False)
     date_applied: Mapped[date] = mapped_column(types.Date, nullable=False)
     status: Mapped[Optional[str]] = mapped_column(types.Text, default="pending")
     created_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Los_Angeles")))
@@ -75,13 +75,13 @@ class Applications(Base):
 
     job_posting: Mapped["JobPostings"] = relationship(back_populates="applications")
     resume: Mapped["Resumes"] = relationship(back_populates="applications")
-    interviews: Mapped[list["Interviews"]] = relationship(back_populates="application")
+    interviews: Mapped[list["Interviews"]] = relationship(back_populates="application", passive_deletes=True)
 
 class Interviews(Base):
     __tablename__ = "interviews"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    applications_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id"), nullable=False)
+    applications_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id", ondelete="CASCADE"), nullable=False)
     type: Mapped[Optional[str]] = mapped_column(types.Text)
     scheduled_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True))
     notes: Mapped[Optional[str]] = mapped_column(types.Text)
@@ -96,14 +96,18 @@ class Skills(Base):
     name: Mapped[str] = mapped_column(types.Text, unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(types.Text)
 
-    job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="skill")
+    job_postings_skills: Mapped[list["JobPostingsSkills"]] = relationship(back_populates="skill", passive_deletes=True)
     
 class JobPostingsSkills(Base):
     __tablename__ = "job_postings_skills"
 
     id: Mapped[uuid.UUID] = mapped_column(types.UUID, primary_key=True, default=uuid.uuid4)
-    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id"), nullable=False)
-    skills_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("skills.id"), nullable=False)
+    job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False)
+    skills_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("skills.id", ondelete="CASCADE"), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("job_postings_id", "skills_id", name="uq_job_postings_job_postings_id_skills_id"),
+    )
 
     skill: Mapped["Skills"] = relationship(back_populates="job_postings_skills")
     job_posting: Mapped["JobPostings"] = relationship(back_populates="job_postings_skills")
