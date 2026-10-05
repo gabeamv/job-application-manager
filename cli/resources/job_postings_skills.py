@@ -13,7 +13,7 @@ def _print(link: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Link Skill to Job Posting --")
+    print("\n-- Link Skill to Job Posting -- (type /back to cancel)")
     payload = to_payload({
         "job_postings_id": prompts.prompt_required_uuid("Job posting ID"),
         "skills_id": prompts.prompt_required_uuid("Skill ID"),
@@ -28,7 +28,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Job Posting Skill by ID --")
+    print("\n-- Get Job Posting Skill by ID -- (type /back to cancel)")
     link_id = prompts.prompt_required_uuid("Job posting skill ID")
     try:
         link = client.get(f"{RESOURCE_PATH}{link_id}")
@@ -55,7 +55,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Job Posting Skill --")
+    print("\n-- Update Job Posting Skill -- (type /back to cancel)")
     link_id = prompts.prompt_required_uuid("Job posting skill ID")
 
     fields = {
@@ -77,7 +77,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Job Posting Skill --")
+    print("\n-- Delete Job Posting Skill -- (type /back to cancel)")
     link_id = prompts.prompt_required_uuid("Job posting skill ID")
     if not prompts.confirm(f"Delete job posting skill {link_id}?"):
         print("Cancelled.")
@@ -111,4 +111,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")

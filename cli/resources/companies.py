@@ -14,7 +14,7 @@ def _print(company: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Create Company --")
+    print("\n-- Create Company -- (type /back to cancel)")
     payload = to_payload({
         "name": prompts.prompt_required_str("Name"),
         "url": prompts.prompt_optional_str("URL"),
@@ -30,7 +30,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Company by ID --")
+    print("\n-- Get Company by ID -- (type /back to cancel)")
     company_id = prompts.prompt_required_uuid("Company ID")
     try:
         company = client.get(f"{RESOURCE_PATH}{company_id}")
@@ -57,7 +57,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Company --")
+    print("\n-- Update Company -- (type /back to cancel)")
     company_id = prompts.prompt_required_uuid("Company ID")
 
     fields = {
@@ -80,7 +80,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Company --")
+    print("\n-- Delete Company -- (type /back to cancel)")
     company_id = prompts.prompt_required_uuid("Company ID")
     if not prompts.confirm(f"Delete company {company_id}?"):
         print("Cancelled.")
@@ -114,4 +114,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")

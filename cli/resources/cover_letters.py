@@ -14,7 +14,7 @@ def _print(cover_letter: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Create Cover Letter --")
+    print("\n-- Create Cover Letter -- (type /back to cancel)")
     payload = to_payload({
         "job_postings_id": prompts.prompt_required_uuid("Job posting ID"),
         "name": prompts.prompt_required_str("Name"),
@@ -30,7 +30,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Cover Letter by ID --")
+    print("\n-- Get Cover Letter by ID -- (type /back to cancel)")
     cover_letter_id = prompts.prompt_required_uuid("Cover letter ID")
     try:
         cover_letter = client.get(f"{RESOURCE_PATH}{cover_letter_id}")
@@ -57,7 +57,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Cover Letter --")
+    print("\n-- Update Cover Letter -- (type /back to cancel)")
     cover_letter_id = prompts.prompt_required_uuid("Cover letter ID")
 
     fields = {
@@ -80,7 +80,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Cover Letter --")
+    print("\n-- Delete Cover Letter -- (type /back to cancel)")
     cover_letter_id = prompts.prompt_required_uuid("Cover letter ID")
     if not prompts.confirm(f"Delete cover letter {cover_letter_id}?"):
         print("Cancelled.")
@@ -114,4 +114,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")

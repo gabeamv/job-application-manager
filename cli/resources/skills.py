@@ -13,7 +13,7 @@ def _print(skill: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Create Skill --")
+    print("\n-- Create Skill -- (type /back to cancel)")
     payload = to_payload({
         "name": prompts.prompt_required_str("Name"),
         "description": prompts.prompt_optional_str("Description"),
@@ -28,7 +28,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Skill by ID --")
+    print("\n-- Get Skill by ID -- (type /back to cancel)")
     skill_id = prompts.prompt_required_uuid("Skill ID")
     try:
         skill = client.get(f"{RESOURCE_PATH}{skill_id}")
@@ -55,7 +55,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Skill --")
+    print("\n-- Update Skill -- (type /back to cancel)")
     skill_id = prompts.prompt_required_uuid("Skill ID")
 
     fields = {
@@ -77,7 +77,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Skill --")
+    print("\n-- Delete Skill -- (type /back to cancel)")
     skill_id = prompts.prompt_required_uuid("Skill ID")
     if not prompts.confirm(f"Delete skill {skill_id}?"):
         print("Cancelled.")
@@ -111,4 +111,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")

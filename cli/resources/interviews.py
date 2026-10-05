@@ -16,7 +16,7 @@ def _print(interview: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Create Interview --")
+    print("\n-- Create Interview -- (type /back to cancel)")
     payload = to_payload({
         "applications_id": prompts.prompt_required_uuid("Application ID"),
         "type": prompts.prompt_optional_str("Type"),
@@ -33,7 +33,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Interview by ID --")
+    print("\n-- Get Interview by ID -- (type /back to cancel)")
     interview_id = prompts.prompt_required_uuid("Interview ID")
     try:
         interview = client.get(f"{RESOURCE_PATH}{interview_id}")
@@ -60,7 +60,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Interview --")
+    print("\n-- Update Interview -- (type /back to cancel)")
     interview_id = prompts.prompt_required_uuid("Interview ID")
 
     fields = {
@@ -84,7 +84,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Interview --")
+    print("\n-- Delete Interview -- (type /back to cancel)")
     interview_id = prompts.prompt_required_uuid("Interview ID")
     if not prompts.confirm(f"Delete interview {interview_id}?"):
         print("Cancelled.")
@@ -118,4 +118,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")

@@ -14,7 +14,7 @@ def _print(resume: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Create Resume --")
+    print("\n-- Create Resume -- (type /back to cancel)")
     payload = to_payload({
         "name": prompts.prompt_required_str("Name"),
         "version": prompts.prompt_required_float("Version"),
@@ -30,7 +30,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Resume by ID --")
+    print("\n-- Get Resume by ID -- (type /back to cancel)")
     resume_id = prompts.prompt_required_uuid("Resume ID")
     try:
         resume = client.get(f"{RESOURCE_PATH}{resume_id}")
@@ -57,7 +57,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Resume --")
+    print("\n-- Update Resume -- (type /back to cancel)")
     resume_id = prompts.prompt_required_uuid("Resume ID")
 
     fields = {
@@ -80,7 +80,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Resume --")
+    print("\n-- Delete Resume -- (type /back to cancel)")
     resume_id = prompts.prompt_required_uuid("Resume ID")
     if not prompts.confirm(f"Delete resume {resume_id}?"):
         print("Cancelled.")
@@ -114,4 +114,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")

@@ -17,7 +17,7 @@ def _print(application: dict):
 
 
 def create(client: ApiClient):
-    print("\n-- Create Application --")
+    print("\n-- Create Application -- (type /back to cancel)")
     payload = to_payload({
         "job_postings_id": prompts.prompt_required_uuid("Job posting ID"),
         "resumes_id": prompts.prompt_required_uuid("Resume ID"),
@@ -34,7 +34,7 @@ def create(client: ApiClient):
 
 
 def get_by_id(client: ApiClient):
-    print("\n-- Get Application by ID --")
+    print("\n-- Get Application by ID -- (type /back to cancel)")
     application_id = prompts.prompt_required_uuid("Application ID")
     try:
         application = client.get(f"{RESOURCE_PATH}{application_id}")
@@ -61,7 +61,7 @@ def get_all(client: ApiClient):
 
 
 def update(client: ApiClient):
-    print("\n-- Update Application --")
+    print("\n-- Update Application -- (type /back to cancel)")
     application_id = prompts.prompt_required_uuid("Application ID")
 
     fields = {
@@ -85,7 +85,7 @@ def update(client: ApiClient):
 
 
 def delete(client: ApiClient):
-    print("\n-- Delete Application --")
+    print("\n-- Delete Application -- (type /back to cancel)")
     application_id = prompts.prompt_required_uuid("Application ID")
     if not prompts.confirm(f"Delete application {application_id}?"):
         print("Cancelled.")
@@ -119,4 +119,7 @@ def menu(client: ApiClient):
         if action is None:
             print("Invalid choice, try again.")
             continue
-        action(client)
+        try:
+            action(client)
+        except prompts.Cancelled:
+            print("Cancelled.")
