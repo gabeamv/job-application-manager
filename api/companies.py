@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from database.db import get_db
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -23,7 +23,39 @@ def create_company(payload: CompanyCreate,  db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail=f"Company {company.name} already exists")
     db.refresh(company)
     return company
-                   
+
+
+@router.get("/by-name", response_model=CompanyResp)
+def get_company_by_name(name: str = Query(...), db: Session = Depends(get_db)):
+    company = db.scalars(select(Companies).where(Companies.name == name)).first()
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Company {name} not found")
+    return company
+
+@router.put("/by-name", response_model=CompanyResp)
+def update_company_by_name(payload: CompanyUpdate, name: str = Query(...), db: Session = Depends(get_db)):
+    company = db.scalars(select(Companies).where(Companies.name == name)).first()
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Company {name} not found")
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(company, field, value)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=f"Company {company.name} already exists")
+    db.refresh(company)
+    return company
+
+@router.delete("/by-name")
+def delete_company_by_name(name: str = Query(...), db: Session = Depends(get_db)):
+    company = db.scalars(select(Companies).where(Companies.name == name)).first()
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Company {name} not found")
+    db.delete(company)
+    db.commit()
+
 
 @router.get("/{id}", response_model=CompanyResp)
 def get_company_by_id(id: UUID, db: Session = Depends(get_db)):

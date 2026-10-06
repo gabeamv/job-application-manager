@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from database.db import get_db
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -23,6 +23,38 @@ def create_skill(payload: SkillCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail=f"Skill {skill.name} already exists")
     db.refresh(skill)
     return skill
+
+
+@router.get("/by-name", response_model=SkillResp)
+def get_skill_by_name(name: str = Query(...), db: Session = Depends(get_db)):
+    skill = db.scalars(select(Skills).where(Skills.name == name)).first()
+    if not skill:
+        raise HTTPException(status_code=404, detail=f"Skill {name} not found")
+    return skill
+
+@router.put("/by-name", response_model=SkillResp)
+def update_skill_by_name(payload: SkillUpdate, name: str = Query(...), db: Session = Depends(get_db)):
+    skill = db.scalars(select(Skills).where(Skills.name == name)).first()
+    if not skill:
+        raise HTTPException(status_code=404, detail=f"Skill {name} not found")
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(skill, field, value)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=f"Skill {skill.name} already exists")
+    db.refresh(skill)
+    return skill
+
+@router.delete("/by-name")
+def delete_skill_by_name(name: str = Query(...), db: Session = Depends(get_db)):
+    skill = db.scalars(select(Skills).where(Skills.name == name)).first()
+    if not skill:
+        raise HTTPException(status_code=404, detail=f"Skill {name} not found")
+    db.delete(skill)
+    db.commit()
 
 
 @router.get("/{id}", response_model=SkillResp)

@@ -16,9 +16,9 @@ class ApiClient:
     def close(self):
         self._client.close()
 
-    def _request(self, method: str, path: str, json=None, headers=None):
+    def _request(self, method: str, path: str, json=None, headers=None, params=None):
         try:
-            response = self._client.request(method, path, json=json, headers=headers)
+            response = self._client.request(method, path, json=json, headers=headers, params=params)
         except httpx.RequestError as exc:
             raise ApiError(None, f"Could not reach API ({exc})") from exc
 
@@ -39,14 +39,14 @@ class ApiClient:
         except ValueError:
             return response.text
 
-    def get(self, path: str, headers=None):
-        return self._request("GET", path, headers=headers)
+    def get(self, path: str, headers=None, params=None):
+        return self._request("GET", path, headers=headers, params=params)
 
     def post(self, path: str, json, headers=None):
         return self._request("POST", path, json=json, headers=headers)
 
-    def put(self, path: str, json, headers=None):
-        return self._request("PUT", path, json=json, headers=headers)
+    def put(self, path: str, json, headers=None, params=None):
+        return self._request("PUT", path, json=json, headers=headers, params=params)
 
-    def delete(self, path: str, headers=None):
-        return self._request("DELETE", path, headers=headers)
+    def delete(self, path: str, headers=None, params=None):
+        return self._request("DELETE", path, headers=headers, params=params)
