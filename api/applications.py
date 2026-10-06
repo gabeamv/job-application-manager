@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from schemas.applications import ApplicationCreate, ApplicationUpdate, ApplicationResp
 from sqlalchemy.exc import IntegrityError
 from fastapi import status
+from datetime import datetime, UTC
 
 
 router = APIRouter()
@@ -46,6 +47,7 @@ def update_application(id: UUID, payload: ApplicationUpdate, db: Session = Depen
     updates = payload.model_dump(exclude_unset=True)
     for field, value in updates.items():
         setattr(application, field, value)
+    application.updated_at = datetime.now(UTC)
     try:
         db.commit()
     except IntegrityError:
