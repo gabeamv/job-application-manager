@@ -106,7 +106,7 @@ class JobPostingsSkills(Base):
     skills_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("skills.id", ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint("job_postings_id", "skills_id", name="uq_job_postings_job_postings_id_skills_id"),
+        UniqueConstraint("job_postings_id", "skills_id", name="uq_job_postings_skills_job_postings_id_skills_id"),
     )
 
     skill: Mapped["Skills"] = relationship(back_populates="job_postings_skills")
