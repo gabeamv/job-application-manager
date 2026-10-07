@@ -1,10 +1,10 @@
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy import types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Optional
 import uuid
 from datetime import datetime, date, UTC
-from zoneinfo import ZoneInfo
+from models.application_status import ApplicationStatus, _status_values
 
 class Base(DeclarativeBase):
     pass
@@ -69,13 +69,17 @@ class Applications(Base):
     job_postings_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False)
     resumes_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"), nullable=False)
     date_applied: Mapped[date] = mapped_column(types.Date, nullable=False)
-    status: Mapped[Optional[str]] = mapped_column(types.Text, default="pending")
+    status: Mapped[str] = mapped_column(types.Text, default=ApplicationStatus.PENDING_RESPONSE, nullable=False)
     created_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(UTC))
     updated_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True))
 
     job_posting: Mapped["JobPostings"] = relationship(back_populates="applications")
     resume: Mapped["Resumes"] = relationship(back_populates="applications")
     interviews: Mapped[list["Interviews"]] = relationship(back_populates="application", passive_deletes=True)
+    # TODO: status will not be nullable, create an application status enumeration, implement a check constraint for enumeration of statuses
+    __table_args__ = (
+        CheckConstraint(f"status IN ({_status_values})", name="ck_application_status"),
+    )
 
 class Interviews(Base):
     __tablename__ = "interviews"
