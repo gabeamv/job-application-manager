@@ -76,7 +76,7 @@ class Applications(Base):
     job_posting: Mapped["JobPostings"] = relationship(back_populates="applications")
     resume: Mapped["Resumes"] = relationship(back_populates="applications")
     interviews: Mapped[list["Interviews"]] = relationship(back_populates="application", passive_deletes=True)
-    # TODO: status will not be nullable, create an application status enumeration, implement a check constraint for enumeration of statuses
+    
     __table_args__ = (
         CheckConstraint(f"status IN ({_status_values})", name="ck_application_status"),
     )

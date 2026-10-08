@@ -13,3 +13,4 @@ app.include_router(job_postings.router, prefix="/api/jobs_postings", tags=["job_
 app.include_router(job_postings_skills.router, prefix="/api/job_postings_skills", tags=["job_postings_skills"])
 app.include_router(resumes.router, prefix="/api/resumes", tags=["resumes"])
 app.include_router(skills.router, prefix="/api/skills", tags=["skills"])
+app.include_router(skills.router, prefix="/api/stats", tags=["stats"])
