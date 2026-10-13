@@ -89,7 +89,7 @@ class Interviews(Base):
     type: Mapped[Optional[str]] = mapped_column(types.Text)
     scheduled_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True))
     notes: Mapped[Optional[str]] = mapped_column(types.Text)
-    created_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(datetime.UTC))
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.TIMESTAMP(timezone=True), default=lambda: datetime.now(UTC))
 
     application: Mapped["Applications"] = relationship(back_populates="interviews")
 

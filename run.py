@@ -9,7 +9,7 @@ app.include_router(applications.router, prefix="/api/applications", tags=["appli
 app.include_router(companies.router, prefix="/api/companies", tags=["companies"])
 app.include_router(cover_letters.router, prefix="/api/cover_letters", tags=["cover_letters"])
 app.include_router(interviews.router, prefix="/api/interviews", tags=["interviews"])
-app.include_router(job_postings.router, prefix="/api/jobs_postings", tags=["job_postings"])
+app.include_router(job_postings.router, prefix="/api/job_postings", tags=["job_postings"])
 app.include_router(job_postings_skills.router, prefix="/api/job_postings_skills", tags=["job_postings_skills"])
 app.include_router(resumes.router, prefix="/api/resumes", tags=["resumes"])
 app.include_router(skills.router, prefix="/api/skills", tags=["skills"])
