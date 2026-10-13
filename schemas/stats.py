@@ -28,3 +28,6 @@ class ApplicationsStatusRate(RespConfig):
 class ApplicationsStatusCount(RespConfig):
     status: str
     count: int
+
+class Rate(RespConfig):
+    rate: float | None
